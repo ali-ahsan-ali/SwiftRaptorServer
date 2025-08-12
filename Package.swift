@@ -21,7 +21,7 @@ let package = Package(
         .package(url: "https://github.com/hummingbird-project/hummingbird-redis.git", from: "2.0.0"),
         .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.26.1"),
         .package(url: "https://github.com/vapor/fluent-sqlite-driver.git", from: "4.7.0"),
-        .package(url: "https://github.com/marmelroy/Zip", from: "2.1.2")
+        .package(url: "https://github.com/agentk/ZIPFoundation.dev.git", branch: "main")
     ],
     targets: [
         .executableTarget(name: "App",
@@ -37,7 +37,7 @@ let package = Package(
                 .product(name: "JobsRedis", package: "swift-jobs-redis"),
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
                 .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver"),
-                .product(name: "Zip", package: "Zip")
+                .product(name: "ZIPFoundation", package: "ZIPFoundation.dev")
             ],
             path: "Sources/App"
         ),

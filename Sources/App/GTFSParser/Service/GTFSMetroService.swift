@@ -5,7 +5,9 @@ import Logging
 import NIOHTTP1
 import NIOHTTPTypesHTTP1
 import ServiceLifecycle
-import Zip
+import ZIPFoundation
+import NIO
+import Foundation
 
 final class GTFSMetroService: Service {
 
@@ -19,7 +21,6 @@ final class GTFSMetroService: Service {
     
     func loadGTFSFeed() async throws {
         let response = try await client.fetchGTFSData()
-        response.body
     }
 
     func saveZipFile(buffer: ByteBuffer) throws -> String {
@@ -44,11 +45,18 @@ final class GTFSMetroService: Service {
     }
 
 
-    func unzipFile(atPath filePath: String) throws -> [URL] {
-        let unzipDirectory = FileManager.default.temporaryDirectory
+    func unzipFile(atPath filePath: String) throws -> URL {
+        let fileManager = FileManager.default
+        let zipDirectory = fileManager.temporaryDirectory
             .appendingPathComponent("metro.zip")
-        
-        return try Zip.quickUnzipFile(unzipDirectory)
+
+        let unzipDirectory = fileManager.temporaryDirectory
+            .appendingPathComponent("metro")
+
+        try fileManager.createDirectory(at: unzipDirectory, withIntermediateDirectories: true, attributes: nil)
+        try fileManager.unzipItem(at: zipDirectory, to: unzipDirectory)
+
+        return unzipDirectory
     }
 
     func run() async throws {

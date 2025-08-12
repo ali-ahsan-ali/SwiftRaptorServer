@@ -48,7 +48,6 @@ public func buildApplication(_ arguments: some AppArguments) async throws -> som
         logger: logger
     )
     
-    _ = JobController(queue: jobQueue)
 
     var jobSchedule = JobSchedule()
     jobSchedule.addJob(
@@ -78,7 +77,9 @@ public func buildApplication(_ arguments: some AppArguments) async throws -> som
     app.addServices(fluent)
 
     let httpClient = HTTPClient(eventLoopGroupProvider: .shared(.singletonMultiThreadedEventLoopGroup))
-    app.addServices(GTFSMetroService(client: httpClient))
+    let metroService = GTFSMetroService(client: httpClient, parser: GTFSParser())
+    app.addServices(metroService)
+    _ = JobController(queue: jobQueue, service: metroService)
 
     return app
 }
