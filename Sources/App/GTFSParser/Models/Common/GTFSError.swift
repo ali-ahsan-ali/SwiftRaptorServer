@@ -4,4 +4,5 @@ enum GTFSError: Error {
     case unzipFailed
     case parsingError(String)
     case fileNotFound(String)
+    case failedToCreateFile
 }

@@ -47,39 +47,47 @@ public func buildApplication(_ arguments: some AppArguments) async throws -> som
         ),
         logger: logger
     )
-    
+
+    let metroService = GTFSMetroService()
+    jobQueue.registerJob(parameters: GTFSMetroJob.self) { parameters, context in
+        try await metroService.loadGTFSFeed()
+    }
 
     var jobSchedule = JobSchedule()
+    jobSchedule.addJob(
+        JobName<GTFSMetroJob>("GTFSMetroJob"),
+        parameters: .init(),
+        schedule: .daily(hour: 2)
+    )
     jobSchedule.addJob(
         jobQueue.queue.cleanupJob,
         parameters: .init(completedJobs: .remove(maxAge: .seconds(24 * 60 * 60))),
         schedule: .hourly(minute: 52)
     )
-    let router = try buildRouter()
     
+
+    let fluent = Fluent(logger: logger)    // add sqlite database
+    fluent.databases.use(.sqlite(.file("db.sqlite")), as: .sqlite)
+
     var app = await Application(
-        router: router,
+        router: try buildRouter(),
         configuration: .init(
             address: .hostname(arguments.hostname, port: arguments.port),
             serverName: "{{HB_PACKAGE_NAME}}"
         ),
         services: [
+            metroService, 
+            fluent,
             redisService,
             jobQueue.processor(options: .init(numWorkers: 4, gracefulShutdownTimeout: .seconds(10))),
-            jobSchedule.scheduler(on: jobQueue, named: "FetchAndMapGTFSData"),
-            jobQueue.processor(options: .init(numWorkers: 4))
+            jobSchedule.scheduler(on: jobQueue, named: "JobScheduler"),
         ],
         logger: logger
     )
     
-    let fluent = Fluent(logger: logger)    // add sqlite database
-    fluent.databases.use(.sqlite(.file("db.sqlite")), as: .sqlite)
-    app.addServices(fluent)
-
-    let httpClient = HTTPClient(eventLoopGroupProvider: .shared(.singletonMultiThreadedEventLoopGroup))
-    let metroService = GTFSMetroService(client: httpClient, parser: GTFSParser())
-    app.addServices(metroService)
-    _ = JobController(queue: jobQueue, service: metroService)
+    app.beforeServerStarts {
+        try await metroService.loadGTFSFeed()
+    }
 
     return app
 }
@@ -98,4 +106,8 @@ func buildRouter() throws -> Router<AppRequestContext> {
     let api = SwiftRaptor()
     try api.registerHandlers(on: router)
     return router
+}
+
+struct GTFSMetroJob: JobParameters {
+    static let jobName: String = "GTFSMetroJob"
 }

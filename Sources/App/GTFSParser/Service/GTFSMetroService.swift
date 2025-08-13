@@ -14,7 +14,7 @@ final class GTFSMetroService: Service {
     private let parser: GTFSParser
     private let client: NSWTransportMetroClient
 
-    init(client: HTTPClient, parser: GTFSParser) {
+    init(parser: GTFSParser = GTFSParser()) {
         self.parser = parser
         self.client = NSWTransportMetroClient()
     }
@@ -31,12 +31,13 @@ final class GTFSMetroService: Service {
         let tempFileName = "metro.zip"
         let filePath = tempDirectory.appendingPathComponent(tempFileName).path
         
+        guard FileManager.default.createFile(atPath: filePath, contents: nil, attributes: nil) else {
+            throw GTFSError.failedToCreateFile
+        }
+
         // Create the file handle
-        let fileHandle = FileHandle(forWritingAtPath: filePath)
-        
-        // Check if the file was created successfully
-        guard let handle = fileHandle else {
-            throw GTFSError.unzipFailed 
+        guard let handle = FileHandle(forWritingAtPath: filePath) else {
+            throw GTFSError.fileNotFound("Handler for writing at path \(filePath) could not be created.") 
         }
         
         // Write the buffer's contents to the file
