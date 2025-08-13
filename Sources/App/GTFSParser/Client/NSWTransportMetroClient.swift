@@ -8,7 +8,7 @@ final class NSWTransportMetroClient: Sendable {
     init() {
     }
     
-    func fetchGTFSData() async throws -> HTTPClientResponse{
+    func fetchGTFSData() async throws -> HTTPClientResponse {
         let environment = Environment()
 
         let headers = HTTPHeaders([("Accept", "application/octet-stream"), ("Authorization", environment.get("API_KEY")!)])

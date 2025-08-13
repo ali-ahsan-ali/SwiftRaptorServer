@@ -29,6 +29,7 @@ let package = Package(
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "Hummingbird", package: "hummingbird"),
                 .byName(name: "AppAPI"),
+                .byName(name: "SwiftTransit"),
                 .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
                 .product(name: "OpenAPIHummingbird", package: "swift-openapi-hummingbird"),
                 .product(name: "HummingbirdFluent", package: "hummingbird-fluent"),
@@ -48,6 +49,11 @@ let package = Package(
             ],
             path: "Sources/AppAPI",
             plugins: [.plugin(name: "OpenAPIGenerator", package: "swift-openapi-generator")]
+        ),
+        .target(
+            name: "SwiftTransit",
+            dependencies: [],
+            path: "Sources/SwiftTransit"
         ),
         .testTarget(name: "AppTests",
             dependencies: [

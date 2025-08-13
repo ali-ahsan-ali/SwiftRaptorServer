@@ -11,7 +11,7 @@ struct JobController {
 
 
         queue.registerJob(parameters: GTFSMetroParameters.self) { parameters, context in
-            
+            try await service.loadGTFSFeed()
         }
     }
 }

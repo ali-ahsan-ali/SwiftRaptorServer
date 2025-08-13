@@ -21,9 +21,12 @@ final class GTFSMetroService: Service {
     
     func loadGTFSFeed() async throws {
         let response = try await client.fetchGTFSData()
+        let savedFilePath = try await saveZipFile(body: response.body)
+        let unzipDirectory = try unzipFile(atPath: savedFilePath)
+        parser.parseGTFSData(atDirectory: unzipDirectory)
     }
 
-    func saveZipFile(buffer: ByteBuffer) throws -> String {
+    func saveZipFile(body: HTTPClientResponse.Body) async throws -> String {
         let tempDirectory = FileManager.default.temporaryDirectory
         let tempFileName = "metro.zip"
         let filePath = tempDirectory.appendingPathComponent(tempFileName).path
@@ -33,11 +36,15 @@ final class GTFSMetroService: Service {
         
         // Check if the file was created successfully
         guard let handle = fileHandle else {
-            throw GTFSError.unzipFailed // Or a more specific error
+            throw GTFSError.unzipFailed 
         }
         
         // Write the buffer's contents to the file
-        try handle.write(contentsOf: buffer.readableBytesView)
+        // Asynchronously loop through each chunk (ByteBuffer) from the sequence.
+        for try await buffer in body {
+            // Write the data from the buffer to the file.
+            try handle.write(contentsOf: buffer.readableBytesView)
+        }
         
         // Close the file handle
         handle.closeFile()
