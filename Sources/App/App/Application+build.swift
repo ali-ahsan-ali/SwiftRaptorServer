@@ -22,12 +22,18 @@ public protocol AppArguments {
 // Request context used by application
 typealias AppRequestContext = BasicRequestContext
 
+let logger = {
+    var logger = Logger(label: "Global")
+    logger.logLevel = .info
+    return logger
+}()
+
 ///  Build application
 /// - Parameter arguments: application arguments
 public func buildApplication(_ arguments: some AppArguments) async throws -> some ApplicationProtocol {
     let env = Environment()
     let redisLogger = Logger(label: "Redis")
-    let logger = {
+    let jobLogger = {
         var logger = Logger(label: "Jobs")
         logger.logLevel =
             arguments.logLevel ?? env.get("LOG_LEVEL").flatMap { Logger.Level(rawValue: $0) } ?? .info
@@ -43,12 +49,17 @@ public func buildApplication(_ arguments: some AppArguments) async throws -> som
         .redis(
             redisService.pool,
             configuration: .init(queueName: "FetchAndMapGTFSData", retentionPolicy: .init(completedJobs: .retain)),
-            logger: logger
+            logger: jobLogger
         ),
-        logger: logger
+        logger: jobLogger
     )
 
-    let metroService = GTFSMetroService()
+
+    let fluent = Fluent(logger: logger)    // add sqlite database
+    fluent.databases.use(.sqlite(.file("db.sqlite")), as: .sqlite)
+    let fluentPersist = await FluentPersistDriver(fluent: fluent)
+
+    let metroService = GTFSMetroService(fluent: fluent)
     jobQueue.registerJob(parameters: GTFSMetroJob.self) { parameters, context in
         try await metroService.loadGTFSFeed()
     }
@@ -66,9 +77,6 @@ public func buildApplication(_ arguments: some AppArguments) async throws -> som
     )
     
 
-    let fluent = Fluent(logger: logger)    // add sqlite database
-    fluent.databases.use(.sqlite(.file("db.sqlite")), as: .sqlite)
-
     var app = await Application(
         router: try buildRouter(),
         configuration: .init(
@@ -78,6 +86,7 @@ public func buildApplication(_ arguments: some AppArguments) async throws -> som
         services: [
             metroService, 
             fluent,
+            fluentPersist,
             redisService,
             jobQueue.processor(options: .init(numWorkers: 4, gracefulShutdownTimeout: .seconds(10))),
             jobSchedule.scheduler(on: jobQueue, named: "JobScheduler"),

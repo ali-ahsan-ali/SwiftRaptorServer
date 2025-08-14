@@ -69,31 +69,27 @@ public enum TransitSomethingError: Error , Sendable {
 /// - Tag: Feed
 public struct Feed: Identifiable {
   public let id = UUID()
-  public var agencies: Agencies?
-  public var routes: Routes?
-  public var stops: Stops?
-  public var trips: Trips?
-  public var stopTimes: StopTimes?
+  public var agencies: Agencies
+  public var routes: Routes
+  public var stops: Stops
+  public var trips: Trips
+  public var stopTimes: StopTimes
 
-  public var agency: Agency? {
-    return agencies?[ 0 ]
+  public var agency: Agency {
+    return agencies[ 0 ]
   }
 
-  public init(contentsOfURL url: URL) {
-    do {
-      let agencyFileURL = url.appendingPathComponent("agency.txt")
-      let routesFileURL = url.appendingPathComponent("routes.txt")
-      let stopsFileURL = url.appendingPathComponent("stops.txt")
-      //let tripsFileURL = url.appendingPathComponent("trips.txt")
-      //let stopTimesFileURL = url.appendingPathComponent("stop_times.txt")
+  public init(contentsOfURL url: URL) throws{
+    let agencyFileURL = url.appendingPathComponent("agency.txt")
+    let routesFileURL = url.appendingPathComponent("routes.txt")
+    let stopsFileURL = url.appendingPathComponent("stops.txt")
+    let tripsFileURL = url.appendingPathComponent("trips.txt")
+    let stopTimesFileURL = url.appendingPathComponent("stop_times.txt")
 
-      self.agencies = try Agencies(from: agencyFileURL)
-      self.routes = try Routes(from: routesFileURL)
-      self.stops = try Stops(from: stopsFileURL)
-      //self.trips = try Trips(from: tripsFileURL)
-      //self.stopTimes = try StopTimes(from: stopTimesFileURL)
-    } catch {
-      return
-    }
+    self.agencies = try Agencies(from: agencyFileURL)
+    self.routes = try Routes(from: routesFileURL)
+    self.stops = try Stops(from: stopsFileURL)
+    self.trips = try Trips(from: tripsFileURL)
+    self.stopTimes = try StopTimes(from: stopTimesFileURL)
   }
 }

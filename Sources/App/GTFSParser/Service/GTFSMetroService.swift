@@ -5,17 +5,17 @@ import Logging
 import NIOHTTP1
 import NIOHTTPTypesHTTP1
 import ServiceLifecycle
-import ZIPFoundation
+import ZipArchive
 import NIO
 import Foundation
+import HummingbirdFluent
 
 final class GTFSMetroService: Service {
-
     private let parser: GTFSParser
     private let client: NSWTransportMetroClient
 
-    init(parser: GTFSParser = GTFSParser()) {
-        self.parser = parser
+    init(fluent: Fluent) {
+        self.parser = GTFSParser(fluent: fluent)
         self.client = NSWTransportMetroClient()
     }
     
@@ -23,15 +23,23 @@ final class GTFSMetroService: Service {
         let response = try await client.fetchGTFSData()
         let savedFilePath = try await saveZipFile(body: response.body)
         let unzipDirectory = try unzipFile(atPath: savedFilePath)
-        parser.parseGTFSData(atDirectory: unzipDirectory)
+        try await parser.parseGTFSData(atDirectory: unzipDirectory)
     }
 
     func saveZipFile(body: HTTPClientResponse.Body) async throws -> String {
-        let tempDirectory = FileManager.default.temporaryDirectory
+        let directory = try FileManager.default.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
         let tempFileName = "metro.zip"
-        let filePath = tempDirectory.appendingPathComponent(tempFileName).path
-        
-        guard FileManager.default.createFile(atPath: filePath, contents: nil, attributes: nil) else {
+        let filePath = directory.appendingPathComponent(tempFileName).path
+
+        if FileManager.default.fileExists(atPath: filePath) {
+            do {
+                try FileManager.default.removeItem(atPath: filePath)
+            } catch {
+                throw GTFSError.failedToRemoveDirectory(error.localizedDescription)
+            }
+        }
+
+        guard FileManager.default.createFile(atPath: filePath, contents: nil, attributes: [.posixPermissions: NSNumber(value: 0o666)]) else {
             throw GTFSError.failedToCreateFile
         }
 
@@ -54,15 +62,39 @@ final class GTFSMetroService: Service {
 
 
     func unzipFile(atPath filePath: String) throws -> URL {
-        let fileManager = FileManager.default
-        let zipDirectory = fileManager.temporaryDirectory
-            .appendingPathComponent("metro.zip")
+        let directory = try FileManager.default.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+        let unzipDirectory = directory.appendingPathComponent("metro")
 
-        let unzipDirectory = fileManager.temporaryDirectory
-            .appendingPathComponent("metro")
+        // Remove any pre-existing directory to ensure a clean slate
+        var isDirectory: Bool = false
+        if FileManager.default.fileExists(atPath: unzipDirectory.path, isDirectory: &isDirectory) {
+            if isDirectory {
+                // If it exists and is a directory, remove it
+                do {
+                    try FileManager.default.removeItem(atPath: unzipDirectory.path)
+                } catch {
+                    throw GTFSError.failedToRemoveDirectory(error.localizedDescription)
+                }
+            } else {
+                // If it exists but is not a directory, throw an error
+                throw GTFSError.fileNotFound("Expected a directory at \(unzipDirectory.path), but found a file.")
+            }
+        }
 
-        try fileManager.createDirectory(at: unzipDirectory, withIntermediateDirectories: true, attributes: nil)
-        try fileManager.unzipItem(at: zipDirectory, to: unzipDirectory)
+        // Create the directory. The ZipArchiveReader will populate this folder.
+        try FileManager.default.createDirectory(at: unzipDirectory, withIntermediateDirectories: true, attributes: nil)
+
+        do {
+            try ZipArchiveReader.withFile(filePath) { reader in
+                do {
+                    try reader.extract(to: .init(unzipDirectory.path))
+                } catch {
+                    throw GTFSError.failedToUnzipFile(error.localizedDescription)
+                }
+            }
+        } catch {
+            throw error 
+        }
 
         return unzipDirectory
     }

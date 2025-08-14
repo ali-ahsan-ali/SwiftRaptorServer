@@ -6,23 +6,17 @@ import XCTest
 
 final class TransitTests: XCTestCase {
 
-  override func setUp() {
+  override func setUpWithError() throws {
     super.setUp()
     let resourcePath = Bundle.main.resourcePath
     let feedURL = URL(fileURLWithPath: resourcePath!)
-    let feed = Feed(contentsOfURL: feedURL)
-    if let agencyName = feed.agency?.name {
-      print(agencyName)
+    let feed = try Feed(contentsOfURL: feedURL)
+    print(feed.agency.name)
+    for route in feed.routes {
+      print(route)
     }
-    if let routes = feed.routes {
-      for route in routes {
-        print(route)
-      }
-    }
-    if let stops = feed.stops {
-      for stop in stops {
-				print(stop)
-      }
+    for stop in feed.stops {
+      print(stop)
     }
   }
 

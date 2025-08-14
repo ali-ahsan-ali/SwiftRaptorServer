@@ -255,7 +255,7 @@ public struct Agencies: Identifiable, RandomAccessCollection {
   /// Initialize agencies dataset from file.
   public init(from url: URL) throws {
     do {
-      let records = try String(contentsOf: url).splitRecords()
+      let records = try String(contentsOf: url, encoding: .nonLossyASCII).splitRecords()
 
       if records.count <= 1 { return }
       let headerRecord = String(records[0])

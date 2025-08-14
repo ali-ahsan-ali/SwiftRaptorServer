@@ -1,5 +1,5 @@
 {
-  "originHash" : "1995086ecd23eb692b61cca882c6e4309f601c422906de4c63aa3128ce4062a2",
+  "originHash" : "774315143deb5d94941334c334ce231642f91e06be29214119d28b9e36a92612",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -353,21 +353,21 @@
       }
     },
     {
+      "identity" : "swift-zip-archive",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/adam-fowler/swift-zip-archive",
+      "state" : {
+        "revision" : "2cf559f47443d99924950c4114aba1af3e688c7d",
+        "version" : "0.6.3"
+      }
+    },
+    {
       "identity" : "yams",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/jpsim/Yams",
       "state" : {
         "revision" : "d41ba4e7164c0838c6d48351f7575f7f762151fe",
         "version" : "6.1.0"
-      }
-    },
-    {
-      "identity" : "zipfoundation.dev",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/agentk/ZIPFoundation.dev.git",
-      "state" : {
-        "branch" : "main",
-        "revision" : "0de55e41439c4c0cb2114f27bdaf8eb28d6f6738"
       }
     }
   ],
