@@ -1,4 +1,3 @@
-import HummingbirdFluent
 import FluentKit
 
 final class Route: Model, @unchecked Sendable {
@@ -38,7 +37,18 @@ final class Route: Model, @unchecked Sendable {
     init() { }
 
     // A complete initializer to create a new Route instance.
-    init(id: UUID? = nil, routeId: String, agencyId: String?, routeShortName: String?, routeLongName: String?, routeDesc: String?, routeType: Int, routeUrl: String?, routeColor: String?, routeTextColor: String?) {
+    public init(
+        id: UUID? = nil,
+        routeId: String,
+        agencyId: String?,
+        routeShortName: String?,
+        routeLongName: String?,
+        routeDesc: String?,
+        routeType: Int,
+        routeUrl: String?,
+        routeColor: String?,
+        routeTextColor: String?
+    ) {
         self.id = id
         self.routeId = routeId
         self.agencyId = agencyId
@@ -51,6 +61,8 @@ final class Route: Model, @unchecked Sendable {
         self.routeTextColor = routeTextColor
     }
 }
+
+// MARK: - Route Migration
 
 struct CreateRoute: AsyncMigration {
     // Prepares the database for storing Route models.

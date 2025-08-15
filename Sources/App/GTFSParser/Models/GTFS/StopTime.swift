@@ -8,16 +8,16 @@ final class StopTime: Model, @unchecked Sendable {
 
     @ID(key: .id)
     var id: UUID?
-    
+
     @Field(key: "tripId")
     var tripId: String
-    
+
     @OptionalField(key: "arrivalTime")
-    var arrivalTime: String?
-    
+    var arrivalTime: Date?
+
     @OptionalField(key: "departureTime")
-    var departureTime: String?
-    
+    var departureTime: Date?
+
     @OptionalField(key: "stopId")
     var stopId: String?
 
@@ -26,19 +26,19 @@ final class StopTime: Model, @unchecked Sendable {
 
     @OptionalField(key: "locationId")
     var locationId: String?
-    
+
     @Field(key: "stopSequence")
     var stopSequence: Int
-    
+
     @OptionalField(key: "stopHeadsign")
     var stopHeadsign: String?
-    
+
     @OptionalField(key: "pickupType")
     var pickupType: Int?
-    
+
     @OptionalField(key: "dropOffType")
     var dropOffType: Int?
-    
+
     @OptionalField(key: "shapeDistTraveled")
     var shapeDistTraveled: Double?
 
@@ -46,7 +46,20 @@ final class StopTime: Model, @unchecked Sendable {
     init() { }
 
     // Complete initializer for creating new instances
-    init(id: UUID? = nil, tripId: String, arrivalTime: String? = nil, departureTime: String? = nil, stopId: String? = nil, locationGroupId: String? = nil, locationId: String? = nil, stopSequence: Int, stopHeadsign: String? = nil, pickupType: Int? = nil, dropOffType: Int? = nil, shapeDistTraveled: Double? = nil) {
+    init(
+        id: UUID? = nil,
+        tripId: String,
+        arrivalTime: Date? = nil,
+        departureTime: Date? = nil,
+        stopId: String? = nil,
+        locationGroupId: String? = nil,
+        locationId: String? = nil,
+        stopSequence: Int,
+        stopHeadsign: String? = nil,
+        pickupType: Int? = nil,
+        dropOffType: Int? = nil,
+        shapeDistTraveled: Double? = nil
+    ) {
         self.id = id
         self.tripId = tripId
         self.arrivalTime = arrivalTime
@@ -71,8 +84,8 @@ struct CreateStopTime: AsyncMigration {
         try await database.schema(StopTime.schema)
             .id()
             .field("tripId", .string, .required)
-            .field("arrivalTime", .string)
-            .field("departureTime", .string)
+            .field("arrivalTime", .date)
+            .field("departureTime", .date)
             .field("stopId", .string)
             .field("locationGroupId", .string)
             .field("locationId", .string)

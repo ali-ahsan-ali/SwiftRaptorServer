@@ -8,40 +8,40 @@ final class Stop: Model, @unchecked Sendable {
 
     @ID(key: .id)
     var id: UUID?
-    
+
     @Field(key: "stopId")
     var stopId: String
-    
+
     @OptionalField(key: "stopCode")
     var stopCode: String?
-    
+
     @OptionalField(key: "stopName")
     var stopName: String?
-    
+
     @OptionalField(key: "stopDesc")
     var stopDesc: String?
-    
+
     @OptionalField(key: "stopLat")
     var stopLat: Double?
-    
+
     @OptionalField(key: "stopLon")
     var stopLon: Double?
-    
+
     @OptionalField(key: "zoneId")
     var zoneId: String?
-    
+
     @OptionalField(key: "stopUrl")
     var stopUrl: String?
-    
+
     @OptionalField(key: "locationType")
     var locationType: Int?
-    
+
     @OptionalField(key: "parentStation")
     var parentStation: String?
-    
+
     @OptionalField(key: "stopTimezone")
     var stopTimezone: String?
-    
+
     @OptionalField(key: "wheelchairBoarding")
     var wheelchairBoarding: Int?
 
@@ -49,7 +49,21 @@ final class Stop: Model, @unchecked Sendable {
     init() { }
 
     // A complete initializer for creating new instances.
-    init(id: UUID? = nil, stopId: String, stopCode: String? = nil, stopName: String? = nil, stopDesc: String? = nil, stopLat: Double? = nil, stopLon: Double? = nil, zoneId: String? = nil, stopUrl: String? = nil, locationType: Int? = nil, parentStation: String? = nil, stopTimezone: String? = nil, wheelchairBoarding: Int? = nil) {
+    init(
+        id: UUID? = nil,
+        stopId: String,
+        stopCode: String? = nil,
+        stopName: String? = nil,
+        stopDesc: String? = nil,
+        stopLat: Double? = nil,
+        stopLon: Double? = nil,
+        zoneId: String? = nil,
+        stopUrl: String? = nil,
+        locationType: Int? = nil,
+        parentStation: String? = nil,
+        stopTimezone: String? = nil,
+        wheelchairBoarding: Int? = nil
+    ) {
         self.id = id
         self.stopId = stopId
         self.stopCode = stopCode

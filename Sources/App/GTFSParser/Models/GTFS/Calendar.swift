@@ -1,8 +1,61 @@
 import HummingbirdFluent
 import FluentKit
 
+// MARK: - Calendar Model
+
 final class Calendar: Model, @unchecked Sendable {
-    init(id: UUID? = nil, serviceId: String, monday: Int, tuesday: Int, wednesday: Int, thursday: Int, friday: Int, saturday: Int, sunday: Int, startDate: String, endDate: String) {
+    static let schema = "calendar"
+
+    @ID(key: .id)
+    var id: UUID?
+
+    @Field(key: "serviceId")
+    var serviceId: String
+
+    @Field(key: "monday")
+    var monday: Int
+
+    @Field(key: "tuesday")
+    var tuesday: Int
+
+    @Field(key: "wednesday")
+    var wednesday: Int
+
+    @Field(key: "thursday")
+    var thursday: Int
+
+    @Field(key: "friday")
+    var friday: Int
+
+    @Field(key: "saturday")
+    var saturday: Int
+
+    @Field(key: "sunday")
+    var sunday: Int
+
+    @Field(key: "startDate")
+    var startDate: String
+
+    @Field(key: "endDate")
+    var endDate: String
+
+    // Required empty initializer for Fluent
+    init() { }
+
+    // Complete initializer for creating new instances
+    init(
+        id: UUID? = nil,
+        serviceId: String,
+        monday: Int,
+        tuesday: Int,
+        wednesday: Int,
+        thursday: Int,
+        friday: Int,
+        saturday: Int,
+        sunday: Int,
+        startDate: String,
+        endDate: String
+    ) {
         self.id = id
         self.serviceId = serviceId
         self.monday = monday
@@ -15,41 +68,17 @@ final class Calendar: Model, @unchecked Sendable {
         self.startDate = startDate
         self.endDate = endDate
     }
-    
-    init() { }
-
-    static let schema = "Calendar"
-
-    @ID(key: .id)
-    var id: UUID?
-    @Field(key: "service_id")
-    var serviceId: String
-    @Field(key: "monday")
-    var monday: Int
-    @Field(key: "tuesday")
-    var tuesday: Int
-    @Field(key: "wednesday")
-    var wednesday: Int
-    @Field(key: "thursday")
-    var thursday: Int
-    @Field(key: "friday")
-    var friday: Int
-    @Field(key: "saturday")
-    var saturday: Int
-    @Field(key: "sunday")
-    var sunday: Int
-    @Field(key: "startDate")
-    var startDate: String
-    @Field(key: "endDate")
-    var endDate: String
 }
 
+// MARK: - Migration
+
 struct CreateCalendar: AsyncMigration {
-    // Prepares the database for storing Calendar models.
+    /// Prepares the database for storing Calendar models.
+    /// This function creates the 'calendar' schema with all the required fields.
     func prepare(on database: Database) async throws {
         try await database.schema(Calendar.schema)
             .id()
-            .field("service_id", .string, .required)
+            .field("serviceId", .string, .required)
             .field("monday", .int, .required)
             .field("tuesday", .int, .required)
             .field("wednesday", .int, .required)
@@ -62,6 +91,8 @@ struct CreateCalendar: AsyncMigration {
             .create()
     }
 
+    /// Reverts the database schema changes made in the prepare method.
+    /// This function deletes the 'calendar' schema.
     func revert(on database: Database) async throws {
         try await database.schema(Calendar.schema).delete()
     }

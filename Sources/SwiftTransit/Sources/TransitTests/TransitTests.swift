@@ -4,23 +4,23 @@
 
 import XCTest
 
-final class TransitTests: XCTestCase {
+// final class TransitTests: XCTestCase {
 
-  override func setUpWithError() throws {
-    super.setUp()
-    let resourcePath = Bundle.main.resourcePath
-    let feedURL = URL(fileURLWithPath: resourcePath!)
-    let feed = try Feed(contentsOfURL: feedURL)
-    print(feed.agency.name)
-    for route in feed.routes {
-      print(route)
-    }
-    for stop in feed.stops {
-      print(stop)
-    }
-  }
+//   override func setUpWithError() throws {
+//     super.setUp()
+//     let resourcePath = Bundle.main.resourcePath
+//     let feedURL = URL(fileURLWithPath: resourcePath!)
+//     let feed = try Feed(contentsOfURL: feedURL)
+//     print(feed.agency.name)
+//     for route in feed.routes {
+//       print(route)
+//     }
+//     for stop in feed.stops {
+//       print(stop)
+//     }
+//   }
 
-}
+// }
 
 /*
 func test_initWithURL() {

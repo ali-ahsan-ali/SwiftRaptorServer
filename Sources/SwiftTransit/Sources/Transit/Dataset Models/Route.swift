@@ -66,7 +66,7 @@ public enum RouteField: String, Hashable, KeyPathVending, Sendable {
 
 // MARK: - RouteField
 
-public enum RouteType: UInt, Hashable, Sendable  {
+public enum RouteType: Int, Hashable, Sendable  {
   case tram = 0
   case subway = 1
   case rail = 2
@@ -80,7 +80,7 @@ public enum RouteType: UInt, Hashable, Sendable  {
   case unknown = 401
 }
 
-public enum PickupDropOffPolicy: UInt, Hashable, Sendable  {
+public enum PickupDropOffPolicy: Int, Hashable, Sendable  {
   case continuous = 0
   case none = 1
   case coordinateWithAgency = 2
@@ -150,7 +150,7 @@ public struct Route: Hashable, Identifiable {
         case .agencyID, .name, .shortName, .details:
           try field.assignOptionalStringTo(&self, for: header)
         case .sortOrder:
-          try field.assignOptionalUIntTo(&self, for: header)
+          try field.assignOptionalIntTo(&self, for: header)
         case .url:
           try field.assignOptionalURLTo(&self, for: header)
         case .type:
@@ -167,7 +167,7 @@ public struct Route: Hashable, Identifiable {
   }
 
   public static func routeTypeFrom(string: String) -> RouteType? {
-    if let rawValue = UInt(string) {
+    if let rawValue = Int(string) {
       return RouteType(rawValue: rawValue)
     } else {
       return nil
@@ -176,7 +176,7 @@ public struct Route: Hashable, Identifiable {
 
   public static func pickupDropOffPolicyFrom(string: String)
 		-> PickupDropOffPolicy? {
-    if let rawValue = UInt(string) {
+    if let rawValue = Int(string) {
       return PickupDropOffPolicy(rawValue: rawValue)
     } else {
       return nil
@@ -253,7 +253,7 @@ public struct Routes: Identifiable {
     }
   }
 
-  init(from url: URL) throws {
+  init(from url: URL, _ add: (Route) async throws -> Void) async throws {
     do {
       var encoding: String.Encoding = .nonLossyASCII
       let records = try String(contentsOfFile: url.path, usedEncoding: &encoding).splitRecords()
@@ -266,7 +266,7 @@ public struct Routes: Identifiable {
       for routeRecord in records[1 ..< records.count] {
         let route = try Route(from: String(routeRecord), using: headerFields)
 				//print(route)
-        self.add(route)
+        try await add(route)
       }
     } catch let error {
       throw error

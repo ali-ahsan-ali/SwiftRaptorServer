@@ -200,31 +200,31 @@ extension String {
     instance[keyPath: path] = self
   }
 
-  func assignUIntTo<InstanceType, FieldType>(
+  func assignIntTo<InstanceType, FieldType>(
 		_ instance: inout InstanceType,
 		for field: FieldType)
 	throws where FieldType: KeyPathVending {
-    guard let path = field.path as? WritableKeyPath<InstanceType, UInt>
+    guard let path = field.path as? WritableKeyPath<InstanceType, Int>
 		else {
       throw TransitAssignError.invalidPath
     }
 		let trimmed = self.trimmingCharacters(in: .whitespaces)
-    guard let uInt = UInt(trimmed)
+    guard let int = Int(trimmed)
 		else {
       throw TransitAssignError.invalidValue
     }
-    instance[keyPath: path] = uInt
+    instance[keyPath: path] = int
   }
 
   /**
    Set `self` as a value for an optional `UInt` field in `instance`.
    - Tag: String-assignOptionalUIntTo
    */
-  func assignOptionalUIntTo<InstanceType, FieldType>(
+  func assignOptionalIntTo<InstanceType, FieldType>(
 		_ instance: inout InstanceType,
 		for field: FieldType)
 	throws where FieldType: KeyPathVending {
-    guard let path = field.path as? WritableKeyPath<InstanceType, UInt?>
+    guard let path = field.path as? WritableKeyPath<InstanceType, Int?>
 		else {
       throw TransitAssignError.invalidPath
     }
@@ -233,11 +233,11 @@ extension String {
 			instance[keyPath: path] = nil
 			return
 		}
-    guard let uInt = UInt(self)
+    guard let int = Int(self)
 		else {
       throw TransitAssignError.invalidValue
     }
-    instance[keyPath: path] = uInt
+    instance[keyPath: path] = int
   }
 
   /**

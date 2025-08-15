@@ -19,7 +19,7 @@ final class GTFSMetroService: Service {
         self.parser = GTFSParser(fluent: fluent)
         self.client = NSWTransportMetroClient()
     }
-    
+
     func loadGTFSFeed() async throws {
         let response = try await client.fetchGTFSData()
         let savedFilePath = try await saveZipFile(body: response.body)
@@ -46,21 +46,20 @@ final class GTFSMetroService: Service {
 
         // Create the file handle
         guard let handle = FileHandle(forWritingAtPath: filePath) else {
-            throw GTFSError.fileNotFound("Handler for writing at path \(filePath) could not be created.") 
+            throw GTFSError.fileNotFound("Handler for writing at path \(filePath) could not be created.")
         }
-        
+
         // Write the buffer's contents to the file
         // Asynchronously loop through each chunk (ByteBuffer) from the sequence.
         for try await buffer in body {
             // Write the data from the buffer to the file.
             try handle.write(contentsOf: buffer.readableBytesView)
         }
-        
+
         // Close the file handle
         handle.closeFile()
         return filePath
     }
-
 
     func unzipFile(atPath filePath: String) throws -> URL {
         let directory = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
@@ -101,7 +100,7 @@ final class GTFSMetroService: Service {
                 }
             }
         } catch {
-            throw error 
+            throw error
         }
 
         return unzipDirectory

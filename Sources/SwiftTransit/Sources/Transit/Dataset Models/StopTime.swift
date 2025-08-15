@@ -21,7 +21,7 @@ import Foundation
 /// ```swift
 ///   let gtfsField = StopTimeField.details.rawValue  //  Returns "route_desc"
 /// ```
-public enum StopTimeField: String, Hashable, KeyPathVending, Sendable  {
+public enum StopTimeField: String, Hashable, KeyPathVending, Sendable {
   /// Trip ID field.
   case tripID = "trip_id"
   /// Trip arrival field.
@@ -48,7 +48,7 @@ public enum StopTimeField: String, Hashable, KeyPathVending, Sendable  {
   case timePointType = "timepoint"
 	/// Used when a nonstandard field is found within a GTFS feed.
 	case nonstandard = "nonstandard"
-	
+
   internal var path: AnyKeyPath {
     switch self {
     case .tripID: return \StopTime.tripID
@@ -77,7 +77,7 @@ public struct StopTime: Hashable, Identifiable {
   public var arrival: Date?
   public var departure: Date?
   public var stopID: TransitID = ""
-  public var stopSequenceNumber: UInt = 0
+  public var stopSequenceNumber: Int = 0
   public var stopHeadingSign: String?
   public var pickupType: Int?
   public var dropOffType: Int?
@@ -85,14 +85,14 @@ public struct StopTime: Hashable, Identifiable {
   public var continuousDropOff: Int?
   public var distanceTraveledForShape: Double?
   public var timePointType: Int?
-	public var nonstandard: String? = nil
+    public var nonstandard: String?
 
   public init(
 		tripID: TransitID = "",
 		arrival: Date? = nil,
 		departure: Date? = nil,
 		stopID: TransitID = "",
-		stopSequenceNumber: UInt = 0,
+		stopSequenceNumber: Int = 0,
 		stopHeadingSign: String? = nil,
 		pickupType: Int? = nil,
 		dropOffType: Int? = nil,
@@ -132,7 +132,7 @@ public struct StopTime: Hashable, Identifiable {
         case .stopHeadingSign:
           try field.assignOptionalStringTo(&self, for: header)
         case .stopSequenceNumber:
-          try field.assignUIntTo(&self, for: header)
+          try field.assignIntTo(&self, for: header)
         case .arrival, .departure, .pickupType, .dropOffType,
              .continuousPickup, .continuousDropOff,
              .distanceTraveledForShape, .timePointType:
@@ -193,11 +193,11 @@ public struct StopTimes: Identifiable {
     }
   }
 
-  init(from url: URL) throws {
+  init(from url: URL, _ add: (StopTime) async throws -> Void) async throws {
     do {
       var encoding: String.Encoding = .nonLossyASCII
       let records = try String(contentsOfFile: url.path, usedEncoding: &encoding).splitRecords()
-      
+
       if records.count < 1 { return }
       let headerRecord = String(records[0])
       self.headerFields = try headerRecord.readHeader()
@@ -206,7 +206,7 @@ public struct StopTimes: Identifiable {
       for stopTimeRecord in records[1 ..< records.count] {
         let stopTime = try StopTime(from: String(stopTimeRecord),
 																		using: headerFields)
-        self.add(stopTime)
+        try await add(stopTime)
       }
     } catch let error {
       throw error

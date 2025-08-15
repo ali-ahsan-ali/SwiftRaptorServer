@@ -254,7 +254,7 @@ public struct Agencies: Identifiable, RandomAccessCollection {
   }
 
   /// Initialize agencies dataset from file.
-  public init(from url: URL) throws {
+  public init(from url: URL, _ add: (Agency) async throws -> Void) async throws {
     do {
       let records = try String(contentsOf: url).splitRecords()
 
@@ -266,7 +266,7 @@ public struct Agencies: Identifiable, RandomAccessCollection {
       for agencyRecord in records[1 ..< records.count] {
 				let agency = try Agency(from: String(agencyRecord),
 																using: headerFields)
-        self.add(agency)
+        try await add(agency)
       }
     } catch let error {
 			print(self)

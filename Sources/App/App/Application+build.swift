@@ -6,7 +6,7 @@ import HummingbirdFluent
 import Jobs
 import JobsRedis
 import ServiceLifecycle
-import FluentSQLiteDriver
+import FluentPostgresDriver
 import AsyncHTTPClient
 
 /// Application arguments protocol. We use a protocol so we can call
@@ -32,7 +32,7 @@ let logger = {
 ///  Build application
 /// - Parameter arguments: application arguments
 public func buildApplication(_ arguments: some AppArguments) async throws -> some ApplicationProtocol {
-    let env = Environment()
+    let env = try await Environment.dotEnv()
     let redisLogger = Logger(label: "Redis")
     let jobLogger = {
         var logger = Logger(label: "Jobs")
@@ -55,12 +55,21 @@ public func buildApplication(_ arguments: some AppArguments) async throws -> som
         logger: jobLogger
     )
 
-
     let fluent = Fluent(logger: logger)    // add sqlite database
-    fluent.databases.use(.sqlite(.file("db.sqlite")), as: .sqlite)
+     let postgreSQLConfig = SQLPostgresConfiguration(
+        hostname: "localhost",
+        port: env.get("DATABASE_PORT").flatMap(Int.init(_:)) ?? SQLPostgresConfiguration.ianaPortNumber,
+        username: env.get("DATABASE_USERNAME") ?? "username",
+        password: env.get("DATABASE_PASSWORD") ?? "password",
+        database: env.get("DATABASE_NAME") ?? "hb-db",
+        tls: .disable
+    )
+
+    fluent.databases.use(.postgres(configuration: postgreSQLConfig, sqlLogLevel: .warning), as: .psql)
+
     let fluentPersist = await FluentPersistDriver(fluent: fluent)
     await fluent.migrations.add(
-        CreateAgency(), 
+        CreateAgency(),
         CreateCalendar(),
         CreateRoute(),
         CreateStop(),
@@ -68,11 +77,10 @@ public func buildApplication(_ arguments: some AppArguments) async throws -> som
         CreateTrip()
     )
     // fluent persist driver requires a migrate the first time you run
-    try await fluent.revert()
     try await fluent.migrate()
 
     let metroService = GTFSMetroService(fluent: fluent)
-    jobQueue.registerJob(parameters: GTFSMetroJob.self) { parameters, context in
+    jobQueue.registerJob(parameters: GTFSMetroJob.self) { _, _ in
         try await metroService.loadGTFSFeed()
     }
 
@@ -87,7 +95,6 @@ public func buildApplication(_ arguments: some AppArguments) async throws -> som
         parameters: .init(completedJobs: .remove(maxAge: .seconds(24 * 60 * 60))),
         schedule: .hourly(minute: 52)
     )
-    
 
     var app = await Application(
         router: try buildRouter(),
@@ -96,16 +103,16 @@ public func buildApplication(_ arguments: some AppArguments) async throws -> som
             serverName: "{{HB_PACKAGE_NAME}}"
         ),
         services: [
-            metroService, 
+            metroService,
             fluent,
             fluentPersist,
             redisService,
             jobQueue.processor(options: .init(numWorkers: 4, gracefulShutdownTimeout: .seconds(10))),
-            jobSchedule.scheduler(on: jobQueue, named: "JobScheduler"),
+            jobSchedule.scheduler(on: jobQueue, named: "JobScheduler")
         ],
         logger: logger
     )
-    
+
     if arguments.shouldCompleteStartupTask {
         app.beforeServerStarts {
             try await metroService.loadGTFSFeed()

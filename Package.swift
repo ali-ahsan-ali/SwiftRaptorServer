@@ -7,7 +7,7 @@ let package = Package(
     name: "SwiftRaptorServer",
     platforms: [.macOS(.v14), .iOS(.v17), .tvOS(.v17)],
     products: [
-        .executable(name: "App", targets: ["App"]),
+        .executable(name: "App", targets: ["App"])
     ],
     dependencies: [
         .package(url: "https://github.com/hummingbird-project/hummingbird.git", from: "2.0.0"),
@@ -20,7 +20,7 @@ let package = Package(
         .package(url: "https://github.com/hummingbird-project/hummingbird-fluent.git", from: "2.0.0"),
         .package(url: "https://github.com/hummingbird-project/hummingbird-redis.git", from: "2.0.0"),
         .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.26.1"),
-        .package(url: "https://github.com/vapor/fluent-sqlite-driver.git", from: "4.7.0"),
+        .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.10.0"),
         .package(url: "https://github.com/adam-fowler/swift-zip-archive", from: "0.6.3")
     ],
     targets: [
@@ -37,7 +37,7 @@ let package = Package(
                 .product(name: "Jobs", package: "swift-jobs"),
                 .product(name: "JobsRedis", package: "swift-jobs-redis"),
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
-                .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver"),
+                .product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"),
                 .product(name: "ZipArchive", package: "swift-zip-archive")
             ],
             path: "Sources/App"

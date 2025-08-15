@@ -13,7 +13,7 @@ internal protocol KeyPathVending {
 }
 
 /// - Tag: TransitError
-public enum TransitError: Error, Sendable  {
+public enum TransitError: Error, Sendable {
   case emptySubstring
   case commaExpected
   case quoteExpected
@@ -45,7 +45,7 @@ extension TransitError: LocalizedError {
 }
 
 /// - Tag: TransitAssignError
-public enum TransitAssignError: Error, Sendable  {
+public enum TransitAssignError: Error, Sendable {
   case invalidPath
   case invalidValue
 }
@@ -62,7 +62,7 @@ extension TransitAssignError: LocalizedError {
 }
 
 /// - Tag: TransitSomethingError
-public enum TransitSomethingError: Error , Sendable {
+public enum TransitSomethingError: Error, Sendable {
   case noDataRecordsFound
 }
 
@@ -79,17 +79,24 @@ public struct Feed: Identifiable {
     return agencies[ 0 ]
   }
 
-  public init(contentsOfURL url: URL) throws{
+  public init(
+    contentsOfURL url: URL,
+    addAgency: (Agency) async throws -> Void,
+    addRoutes: (Route) async throws -> Void,
+    addStop: (Stop) async throws-> Void,
+    addTrip: (Trip) async throws -> Void,
+    addStopTime: (StopTime) async throws-> Void
+  ) async throws {
     let agencyFileURL = url.appendingPathComponent("agency.txt")
     let routesFileURL = url.appendingPathComponent("routes.txt")
     let stopsFileURL = url.appendingPathComponent("stops.txt")
     let tripsFileURL = url.appendingPathComponent("trips.txt")
     let stopTimesFileURL = url.appendingPathComponent("stop_times.txt")
 
-    self.agencies = try Agencies(from: agencyFileURL)
-    self.routes = try Routes(from: routesFileURL)
-    self.stops = try Stops(from: stopsFileURL)
-    self.trips = try Trips(from: tripsFileURL)
-    self.stopTimes = try StopTimes(from: stopTimesFileURL)
+    self.agencies = try await Agencies(from: agencyFileURL, addAgency)
+    self.routes = try await Routes(from: routesFileURL, addRoutes)
+    self.stops = try await Stops(from: stopsFileURL, addStop)
+    self.trips = try await Trips(from: tripsFileURL, addTrip)
+    self.stopTimes = try await StopTimes(from: stopTimesFileURL, addStopTime)
   }
 }

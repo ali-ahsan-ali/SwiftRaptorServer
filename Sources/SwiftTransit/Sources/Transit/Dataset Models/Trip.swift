@@ -176,7 +176,7 @@ public struct Trips: Identifiable {
     }
   }
 
-  init(from url: URL) throws {
+  init(from url: URL, _ add: (Trip) async throws -> Void) async throws {
     do {
       var encoding: String.Encoding = .nonLossyASCII
       let records = try String(contentsOfFile: url.path, usedEncoding: &encoding).splitRecords()
@@ -188,7 +188,7 @@ public struct Trips: Identifiable {
       self.trips.reserveCapacity(records.count - 1)
       for tripRecord in records[1 ..< records.count] {
         let trip = try Trip(from: String(tripRecord), using: headerFields)
-        self.add(trip)
+        try await add(trip)
       }
     } catch let error {
       throw error

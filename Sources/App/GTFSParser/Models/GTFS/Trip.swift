@@ -25,7 +25,7 @@ final class Trip: Model, @unchecked Sendable {
     var tripShortName: String?
 
     @OptionalField(key: "directionId")
-    var directionId: Int?
+    var directionId: String?
 
     @OptionalField(key: "blockId")
     var blockId: String?
@@ -34,13 +34,24 @@ final class Trip: Model, @unchecked Sendable {
     var shapeId: String?
 
     @OptionalField(key: "wheelchairAccessible")
-    var wheelchairAccessible: Int?
+    var wheelchairAccessible: String?
 
     // Required empty initializer for Fluent
     init() { }
 
     // Complete initializer for creating new instances
-    init(id: UUID? = nil, routeId: String, serviceId: String, tripId: String, tripHeadsign: String? = nil, tripShortName: String? = nil, directionId: Int? = nil, blockId: String? = nil, shapeId: String? = nil, wheelchairAccessible: Int? = nil) {
+    init(
+        id: UUID? = nil,
+        routeId: String,
+        serviceId: String,
+        tripId: String,
+        tripHeadsign: String? = nil,
+        tripShortName: String? = nil,
+        directionId: String? = nil,
+        blockId: String? = nil,
+        shapeId: String? = nil,
+        wheelchairAccessible: String? = nil
+    ) {
         self.id = id
         self.routeId = routeId
         self.serviceId = serviceId
@@ -67,10 +78,10 @@ struct CreateTrip: AsyncMigration {
             .field("tripId", .string, .required)
             .field("tripHeadsign", .string)
             .field("tripShortName", .string)
-            .field("directionId", .int)
+            .field("directionId", .string)
             .field("blockId", .string)
             .field("shapeId", .string)
-            .field("wheelchairAccessible", .int)
+            .field("wheelchairAccessible", .string)
             .create()
     }
 

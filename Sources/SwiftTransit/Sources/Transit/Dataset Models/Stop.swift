@@ -78,7 +78,7 @@ public enum StopField: String, Hashable, KeyPathVending, Sendable {
 public typealias StopCode = String
 
 /// - Tag: StopLocationType
-public enum StopLocationType: UInt, Hashable, Sendable  {
+public enum StopLocationType: Int, Hashable, Sendable  {
   case stopOrPlatform = 0
   case station = 1
   case entranceOrExit = 2
@@ -87,7 +87,7 @@ public enum StopLocationType: UInt, Hashable, Sendable  {
 }
 
 /// - Tag: Accessibility
-public enum Accessibility: UInt, Hashable, Sendable  {
+public enum Accessibility: Int, Hashable, Sendable  {
   case unknownOrInherits = 0
   case partialOrFull = 1
   case none = 2
@@ -182,7 +182,7 @@ public struct Stop: Hashable, Identifiable {
 
   public static func stopLocationTypeFrom(string: String)
 		-> StopLocationType? {
-    if let rawValue = UInt(string) {
+    if let rawValue = Int(string) {
       return StopLocationType(rawValue: rawValue)
     } else {
       return nil
@@ -190,7 +190,7 @@ public struct Stop: Hashable, Identifiable {
   }
 
   public static func accessibilityFrom(string: String) -> Accessibility? {
-    if let rawValue = UInt(string) {
+    if let rawValue = Int(string) {
       return Accessibility(rawValue: rawValue)
     } else {
       return nil
@@ -259,7 +259,7 @@ public struct Stops: Identifiable {
     }
   }
 
-  init(from url: URL) throws {
+  init(from url: URL, _ add: (Stop) async throws -> Void) async throws {
     do {
       var encoding: String.Encoding = .nonLossyASCII
       let records = try String(contentsOfFile: url.path, usedEncoding: &encoding).splitRecords()
@@ -271,7 +271,7 @@ public struct Stops: Identifiable {
       self.stops.reserveCapacity(records.count - 1)
       for stopRecord in records[1 ..< records.count] {
         let stop = try Stop(from: String(stopRecord), using: headerFields)
-        self.add(stop)
+        try await add(stop)
       }
     } catch let error {
       throw error
