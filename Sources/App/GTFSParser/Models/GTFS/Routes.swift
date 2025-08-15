@@ -51,3 +51,26 @@ final class Route: Model, @unchecked Sendable {
         self.routeTextColor = routeTextColor
     }
 }
+
+struct CreateRoute: AsyncMigration {
+    // Prepares the database for storing Route models.
+    func prepare(on database: Database) async throws {
+        try await database.schema(Route.schema)
+            .id()
+            .field("routeId", .string, .required)
+            .field("agencyId", .string)
+            .field("routeShortName", .string)
+            .field("routeLongName", .string)
+            .field("routeDesc", .string)
+            .field("routeType", .int, .required)
+            .field("routeUrl", .string)
+            .field("routeColor", .string)
+            .field("routeTextColor", .string)
+            .create()
+    }
+
+    // Reverts the database schema changes made in prepare.
+    func revert(on database: Database) async throws {
+        try await database.schema(Route.schema).delete()
+    }
+}

@@ -22,8 +22,8 @@ final class Calendar: Model, @unchecked Sendable {
 
     @ID(key: .id)
     var id: UUID?
-    @ID(custom: "service_id")
-    var serviceId: String?
+    @Field(key: "service_id")
+    var serviceId: String
     @Field(key: "monday")
     var monday: Int
     @Field(key: "tuesday")
@@ -42,4 +42,27 @@ final class Calendar: Model, @unchecked Sendable {
     var startDate: String
     @Field(key: "endDate")
     var endDate: String
+}
+
+struct CreateCalendar: AsyncMigration {
+    // Prepares the database for storing Calendar models.
+    func prepare(on database: Database) async throws {
+        try await database.schema(Calendar.schema)
+            .id()
+            .field("service_id", .string, .required)
+            .field("monday", .int, .required)
+            .field("tuesday", .int, .required)
+            .field("wednesday", .int, .required)
+            .field("thursday", .int, .required)
+            .field("friday", .int, .required)
+            .field("saturday", .int, .required)
+            .field("sunday", .int, .required)
+            .field("startDate", .string, .required)
+            .field("endDate", .string, .required)
+            .create()
+    }
+
+    func revert(on database: Database) async throws {
+        try await database.schema(Calendar.schema).delete()
+    }
 }

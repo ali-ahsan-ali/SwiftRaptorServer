@@ -1,6 +1,8 @@
 import HummingbirdFluent
 import FluentKit
 
+// MARK: - StopTime Model
+
 final class StopTime: Model, @unchecked Sendable {
     static let schema = "stop_time"
 
@@ -57,5 +59,34 @@ final class StopTime: Model, @unchecked Sendable {
         self.pickupType = pickupType
         self.dropOffType = dropOffType
         self.shapeDistTraveled = shapeDistTraveled
+    }
+}
+
+// MARK: - Migration
+
+struct CreateStopTime: AsyncMigration {
+    /// Prepares the database for storing StopTime models.
+    /// This function creates the 'stop_time' schema with all the required fields.
+    func prepare(on database: Database) async throws {
+        try await database.schema(StopTime.schema)
+            .id()
+            .field("tripId", .string, .required)
+            .field("arrivalTime", .string)
+            .field("departureTime", .string)
+            .field("stopId", .string)
+            .field("locationGroupId", .string)
+            .field("locationId", .string)
+            .field("stopSequence", .int, .required)
+            .field("stopHeadsign", .string)
+            .field("pickupType", .int)
+            .field("dropOffType", .int)
+            .field("shapeDistTraveled", .double)
+            .create()
+    }
+
+    /// Reverts the database schema changes made in prepare.
+    /// This function deletes the 'stop_time' schema.
+    func revert(on database: Database) async throws {
+        try await database.schema(StopTime.schema).delete()
     }
 }

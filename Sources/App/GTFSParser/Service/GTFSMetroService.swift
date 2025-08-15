@@ -13,6 +13,7 @@ import HummingbirdFluent
 final class GTFSMetroService: Service {
     private let parser: GTFSParser
     private let client: NSWTransportMetroClient
+    let attributes: [FileAttributeKey: any Sendable] = [.posixPermissions: NSNumber(value: 0o666)]
 
     init(fluent: Fluent) {
         self.parser = GTFSParser(fluent: fluent)
@@ -27,7 +28,7 @@ final class GTFSMetroService: Service {
     }
 
     func saveZipFile(body: HTTPClientResponse.Body) async throws -> String {
-        let directory = try FileManager.default.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+        let directory = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
         let tempFileName = "metro.zip"
         let filePath = directory.appendingPathComponent(tempFileName).path
 
@@ -39,7 +40,7 @@ final class GTFSMetroService: Service {
             }
         }
 
-        guard FileManager.default.createFile(atPath: filePath, contents: nil, attributes: [.posixPermissions: NSNumber(value: 0o666)]) else {
+        guard FileManager.default.createFile(atPath: filePath, contents: nil, attributes: attributes) else {
             throw GTFSError.failedToCreateFile
         }
 
@@ -62,7 +63,7 @@ final class GTFSMetroService: Service {
 
 
     func unzipFile(atPath filePath: String) throws -> URL {
-        let directory = try FileManager.default.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+        let directory = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
         let unzipDirectory = directory.appendingPathComponent("metro")
 
         // Remove any pre-existing directory to ensure a clean slate
@@ -86,6 +87,13 @@ final class GTFSMetroService: Service {
 
         do {
             try ZipArchiveReader.withFile(filePath) { reader in
+                try reader.parseDirectory { file in
+                    let path = unzipDirectory.appending(component: file.filename.string).path
+                    guard FileManager.default.createFile(atPath: path, contents: nil, attributes: attributes) else {
+                        throw GTFSError.failedToCreateFile
+                    }
+                }
+
                 do {
                     try reader.extract(to: .init(unzipDirectory.path))
                 } catch {

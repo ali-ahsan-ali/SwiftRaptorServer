@@ -50,7 +50,9 @@ extension Substring {
       self = self[index(after: nextQuote)...]
       if !isEmpty {
         let comma = removeFirst()
-        if comma != "," { throw TransitError.commaExpected }
+        if comma != "," { 
+          throw TransitError.commaExpected 
+        }
       }
       return String(field)
 		case ",":

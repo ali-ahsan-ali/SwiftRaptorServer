@@ -241,6 +241,7 @@ public struct Agencies: Identifiable, RandomAccessCollection {
 
   mutating func add(_ agency: Agency) {
     self.agencies.append(agency)
+    endIndex += 1
   }
 
   mutating func remove(_ agency: Agency) {
@@ -255,7 +256,7 @@ public struct Agencies: Identifiable, RandomAccessCollection {
   /// Initialize agencies dataset from file.
   public init(from url: URL) throws {
     do {
-      let records = try String(contentsOf: url, encoding: .nonLossyASCII).splitRecords()
+      let records = try String(contentsOf: url).splitRecords()
 
       if records.count <= 1 { return }
       let headerRecord = String(records[0])

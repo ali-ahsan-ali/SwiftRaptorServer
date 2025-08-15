@@ -77,6 +77,7 @@ public enum RouteType: UInt, Hashable, Sendable  {
   case funicular = 7
   case trolleybus = 11
   case monorail = 12
+  case unknown = 401
 }
 
 public enum PickupDropOffPolicy: UInt, Hashable, Sendable  {
@@ -254,7 +255,8 @@ public struct Routes: Identifiable {
 
   init(from url: URL) throws {
     do {
-      let records = try String(contentsOf: url).splitRecords()
+      var encoding: String.Encoding = .nonLossyASCII
+      let records = try String(contentsOfFile: url.path, usedEncoding: &encoding).splitRecords()
 
       if records.count <= 1 { return }
       let headerRecord = String(records[0])

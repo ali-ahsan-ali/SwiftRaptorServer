@@ -178,8 +178,9 @@ public struct Trips: Identifiable {
 
   init(from url: URL) throws {
     do {
-      let records = try String(contentsOf: url).splitRecords()
-
+      var encoding: String.Encoding = .nonLossyASCII
+      let records = try String(contentsOfFile: url.path, usedEncoding: &encoding).splitRecords()
+      
       if records.count < 1 { return }
       let headerRecord = String(records[0])
       self.headerFields = try headerRecord.readHeader()

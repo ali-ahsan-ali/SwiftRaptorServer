@@ -17,6 +17,7 @@ public protocol AppArguments {
     var hostname: String { get }
     var port: Int { get }
     var logLevel: Logger.Level? { get }
+    var shouldCompleteStartupTask: Bool { get }
 }
 
 // Request context used by application
@@ -58,13 +59,24 @@ public func buildApplication(_ arguments: some AppArguments) async throws -> som
     let fluent = Fluent(logger: logger)    // add sqlite database
     fluent.databases.use(.sqlite(.file("db.sqlite")), as: .sqlite)
     let fluentPersist = await FluentPersistDriver(fluent: fluent)
+    await fluent.migrations.add(
+        CreateAgency(), 
+        CreateCalendar(),
+        CreateRoute(),
+        CreateStop(),
+        CreateStopTime(),
+        CreateTrip()
+    )
+    // fluent persist driver requires a migrate the first time you run
+    try await fluent.revert()
+    try await fluent.migrate()
 
     let metroService = GTFSMetroService(fluent: fluent)
     jobQueue.registerJob(parameters: GTFSMetroJob.self) { parameters, context in
         try await metroService.loadGTFSFeed()
     }
 
-    var jobSchedule = JobSchedule()
+    var jobSchedule: JobSchedule = JobSchedule()
     jobSchedule.addJob(
         JobName<GTFSMetroJob>("GTFSMetroJob"),
         parameters: .init(),
@@ -94,8 +106,10 @@ public func buildApplication(_ arguments: some AppArguments) async throws -> som
         logger: logger
     )
     
-    app.beforeServerStarts {
-        try await metroService.loadGTFSFeed()
+    if arguments.shouldCompleteStartupTask {
+        app.beforeServerStarts {
+            try await metroService.loadGTFSFeed()
+        }
     }
 
     return app

@@ -261,8 +261,9 @@ public struct Stops: Identifiable {
 
   init(from url: URL) throws {
     do {
-      let records = try String(contentsOf: url).splitRecords()
-
+      var encoding: String.Encoding = .nonLossyASCII
+      let records = try String(contentsOfFile: url.path, usedEncoding: &encoding).splitRecords()
+      
       if records.count <= 1 { return }
       let headerRecord = String(records[0])
       self.headerFields = try headerRecord.readHeader()
@@ -270,7 +271,6 @@ public struct Stops: Identifiable {
       self.stops.reserveCapacity(records.count - 1)
       for stopRecord in records[1 ..< records.count] {
         let stop = try Stop(from: String(stopRecord), using: headerFields)
-				print(stop)
         self.add(stop)
       }
     } catch let error {
