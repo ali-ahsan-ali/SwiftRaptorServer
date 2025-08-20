@@ -6,8 +6,8 @@ import FluentKit
 final class Calendar: Model, @unchecked Sendable {
     static let schema = "calendar"
 
-    @ID(key: .id)
-    var id: UUID?
+    @ID(custom: .id)
+    var id: String?
 
     @Field(key: "serviceId")
     var serviceId: String
@@ -44,7 +44,7 @@ final class Calendar: Model, @unchecked Sendable {
 
     // Complete initializer for creating new instances
     init(
-        id: UUID? = nil,
+        id: String? = nil,
         serviceId: String,
         monday: Int,
         tuesday: Int,

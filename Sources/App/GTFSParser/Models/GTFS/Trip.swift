@@ -6,8 +6,8 @@ import FluentKit
 final class Trip: Model, @unchecked Sendable {
     static let schema = "trip"
 
-    @ID(key: .id)
-    var id: UUID?
+    @ID(custom: .id)
+    var id: String?
 
     @Field(key: "routeId")
     var routeId: String
@@ -41,7 +41,7 @@ final class Trip: Model, @unchecked Sendable {
 
     // Complete initializer for creating new instances
     init(
-        id: UUID? = nil,
+        id: String? = nil,
         routeId: String,
         serviceId: String,
         tripId: String,

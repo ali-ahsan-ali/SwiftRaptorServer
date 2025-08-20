@@ -6,17 +6,14 @@ import HummingbirdFluent
 final class Agency: Model, @unchecked Sendable {
     static let schema = "agency"
 
-    @ID(key: .id)
-    var id: UUID?
-
-    @Field(key: "agencyId")
-    var agencyId: String?
+    @ID(custom: "agencyId", generatedBy: .user)
+    var id: String?
 
     @Field(key: "agencyName")
     var agencyName: String
 
-    @Field(key: "agencyUrl")
-    var agencyUrl: String
+    @OptionalField(key: "agencyUrl")
+    var agencyUrl: String?
 
     @Field(key: "agencyTimezone")
     var agencyTimezone: String
@@ -38,12 +35,11 @@ final class Agency: Model, @unchecked Sendable {
 
     // Complete initializer for creating new instances
     init(
-        id: UUID? = nil, agencyId: String? = nil, agencyName: String, agencyUrl: String,
+        id: String? = nil, agencyName: String, agencyUrl: String,
         agencyTimezone: String, agencyLang: String? = nil, agencyPhone: String? = nil,
         agencyFareUrl: String? = nil, agencyEmail: String? = nil
     ) {
         self.id = id
-        self.agencyId = agencyId
         self.agencyName = agencyName
         self.agencyUrl = agencyUrl
         self.agencyTimezone = agencyTimezone
@@ -62,7 +58,6 @@ struct CreateAgency: AsyncMigration {
     func prepare(on database: Database) async throws {
         try await database.schema(Agency.schema)
         .id()
-        .field("agencyId", .string)
         .field("agencyName", .string, .required)
         .field("agencyUrl", .string, .required)
         .field("agencyTimezone", .string, .required)

@@ -3,8 +3,8 @@ import FluentKit
 final class Route: Model, @unchecked Sendable {
     static let schema = "route"
 
-    @ID(key: .id)
-    var id: UUID?
+    @ID(custom: .id)
+    var id: String?
 
     @Field(key: "routeId")
     var routeId: String
@@ -38,7 +38,7 @@ final class Route: Model, @unchecked Sendable {
 
     // A complete initializer to create a new Route instance.
     public init(
-        id: UUID? = nil,
+        id: String? = nil,
         routeId: String,
         agencyId: String?,
         routeShortName: String?,

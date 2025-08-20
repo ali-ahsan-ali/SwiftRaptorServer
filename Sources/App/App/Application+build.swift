@@ -55,7 +55,7 @@ public func buildApplication(_ arguments: some AppArguments) async throws -> som
         logger: jobLogger
     )
 
-    let fluent = Fluent(logger: logger)    // add sqlite database
+    let fluent = Fluent(logger: logger)
      let postgreSQLConfig = SQLPostgresConfiguration(
         hostname: "localhost",
         port: env.get("DATABASE_PORT").flatMap(Int.init(_:)) ?? SQLPostgresConfiguration.ianaPortNumber,
@@ -76,8 +76,6 @@ public func buildApplication(_ arguments: some AppArguments) async throws -> som
         CreateStopTime(),
         CreateTrip()
     )
-    // fluent persist driver requires a migrate the first time you run
-    try await fluent.migrate()
 
     let metroService = GTFSMetroService(fluent: fluent)
     jobQueue.registerJob(parameters: GTFSMetroJob.self) { _, _ in
@@ -115,6 +113,8 @@ public func buildApplication(_ arguments: some AppArguments) async throws -> som
 
     if arguments.shouldCompleteStartupTask {
         app.beforeServerStarts {
+            // fluent persist driver requires a migrate the first time you run
+            try await fluent.migrate()
             try await metroService.loadGTFSFeed()
         }
     }

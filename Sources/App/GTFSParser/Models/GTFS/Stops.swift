@@ -6,8 +6,8 @@ import FluentKit
 final class Stop: Model, @unchecked Sendable {
     static let schema = "stop"
 
-    @ID(key: .id)
-    var id: UUID?
+    @ID(custom: .id)
+    var id: String?
 
     @Field(key: "stopId")
     var stopId: String
@@ -50,7 +50,7 @@ final class Stop: Model, @unchecked Sendable {
 
     // A complete initializer for creating new instances.
     init(
-        id: UUID? = nil,
+        id: String? = nil,
         stopId: String,
         stopCode: String? = nil,
         stopName: String? = nil,
