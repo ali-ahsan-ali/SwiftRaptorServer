@@ -90,7 +90,7 @@ public enum PickupDropOffPolicy: Int, Hashable, Sendable  {
 // MARK: - Route
 
 /// A representation of a single Route record.
-public struct Route: Hashable, Identifiable {
+public struct Route: Hashable, Identifiable, Sendable {
   public let id = UUID()
   public var routeID: TransitID = ""
   public var agencyID: TransitID?
@@ -220,7 +220,7 @@ extension Route: CustomStringConvertible {
 // MARK: - Routes
 
 /// A representation of a complete Route dataset.
-public struct Routes: Identifiable {
+public struct Routes: Identifiable, Sendable {
   public let id = UUID()
   public var headerFields = [RouteField]()
 	public var routes: [Route] = []
@@ -255,8 +255,7 @@ public struct Routes: Identifiable {
 
   init(from url: URL, _ add: (Route) async throws -> Void) async throws {
     do {
-      var encoding: String.Encoding = .nonLossyASCII
-      let records = try String(contentsOfFile: url.path, usedEncoding: &encoding).splitRecords()
+      let records: [Substring] = try String(contentsOfFile: url.path).splitRecords()
 
       if records.count <= 1 { return }
       let headerRecord = String(records[0])

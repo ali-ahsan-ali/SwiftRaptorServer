@@ -6,7 +6,7 @@ import HummingbirdFluent
 final class Agency: Model, @unchecked Sendable {
     static let schema = "agency"
 
-    @ID(custom: "agencyId", generatedBy: .user)
+    @ID(custom: .id)
     var id: String?
 
     @Field(key: "agencyName")
@@ -35,7 +35,7 @@ final class Agency: Model, @unchecked Sendable {
 
     // Complete initializer for creating new instances
     init(
-        id: String? = nil, agencyName: String, agencyUrl: String,
+        id: String? = UUID().uuidString, agencyName: String, agencyUrl: String,
         agencyTimezone: String, agencyLang: String? = nil, agencyPhone: String? = nil,
         agencyFareUrl: String? = nil, agencyEmail: String? = nil
     ) {
@@ -57,7 +57,7 @@ struct CreateAgency: AsyncMigration {
     /// This function creates the 'agency' schema with all the required fields.
     func prepare(on database: Database) async throws {
         try await database.schema(Agency.schema)
-        .id()
+        .field("id", .string, .identifier(auto: false))
         .field("agencyName", .string, .required)
         .field("agencyUrl", .string, .required)
         .field("agencyTimezone", .string, .required)
@@ -71,6 +71,6 @@ struct CreateAgency: AsyncMigration {
     /// Reverts the database schema changes made in the prepare method.
     /// This function deletes the 'agency' schema.
     func revert(on database: Database) async throws {
-        try await database.schema(Agency.schema).delete()
+        try? await database.schema(Agency.schema).delete()
     }
 }

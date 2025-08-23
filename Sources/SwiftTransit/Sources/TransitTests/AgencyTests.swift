@@ -196,14 +196,14 @@ final class AgencyTests: XCTestCase {
 		XCTAssertFalse(agencies.hasRequiredFields)
 	}
 	
-	func test_hasConditionallyRequiredFields() {
-		let headers: [AgencyField] = [
-			.agencyID
-		]
-		var agencies = Agencies()
-		agencies.headerFields = headers
-		XCTAssertTrue(agencies.hasConditionallyRequiredFields)
-	}
+	// func test_hasConditionallyRequiredFields() {
+	// 	let headers: [AgencyField] = [
+	// 		.agencyID
+	// 	]
+	// 	var agencies = Agencies()
+	// 	agencies.headerFields = headers
+	// 	XCTAssertTrue(agencies.hasConditionallyRequiredFields)
+	// }
 	
 	func test_missingConditionallyRequiredFields() {
 		let headers: [AgencyField] = [

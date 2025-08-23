@@ -47,7 +47,7 @@ final class StopTime: Model, @unchecked Sendable {
 
     // Complete initializer for creating new instances
     init(
-        id: String? = nil,
+        id: String? = UUID().uuidString,
         tripId: String,
         arrivalTime: Date? = nil,
         departureTime: Date? = nil,
@@ -82,7 +82,7 @@ struct CreateStopTime: AsyncMigration {
     /// This function creates the 'stop_time' schema with all the required fields.
     func prepare(on database: Database) async throws {
         try await database.schema(StopTime.schema)
-            .id()
+            .field("id", .string, .identifier(auto: false))
             .field("tripId", .string, .required)
             .field("arrivalTime", .date)
             .field("departureTime", .date)
@@ -100,6 +100,6 @@ struct CreateStopTime: AsyncMigration {
     /// Reverts the database schema changes made in prepare.
     /// This function deletes the 'stop_time' schema.
     func revert(on database: Database) async throws {
-        try await database.schema(StopTime.schema).delete()
+        try? await database.schema(StopTime.schema).delete()
     }
 }

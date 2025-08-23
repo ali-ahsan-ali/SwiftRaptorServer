@@ -59,7 +59,7 @@ public enum AgencyField: String, Hashable, KeyPathVending, Sendable {
 // MARK: - Agency
 
 /// A representation of an Agency record.
-public struct Agency: Hashable, Identifiable {
+public struct Agency: Hashable, Identifiable, Sendable {
 	
   /// A globally unique identifier. Because GTFS does not guarantee
   /// that IDs will be unique
@@ -68,7 +68,7 @@ public struct Agency: Hashable, Identifiable {
   /// agency itself. But in the event that multiple services are contained
   /// within the same dataset, this ID can be used to uniquely identify
   /// each.
-  public var agencyID: String?
+  public var agencyID: String = ""
   /// The full name of the agency.
   public var name: String = ""
   /// Agency URL.
@@ -88,11 +88,11 @@ public struct Agency: Hashable, Identifiable {
   /// A `Set` that enumerates the fields that must appear within an ``Agency``
 	/// record.
   public static let requiredFields: Set<AgencyField>
-    = [.name, .url, .timeZone]
+    = [.name, .url, .timeZone, .agencyID]
   /// A `Set` that enumerates the fields that may be conditionally required
 	/// to appear within an ``Agency`` record.
-  public static let conditionallyRequiredFields: Set<AgencyField>
-    = [.agencyID]
+  // public static let conditionallyRequiredFields: Set<AgencyField>
+  //   = [.agencyID]
   /// A `Set` that enumerates the fields that may optionally appear within an
 	/// ``Agency`` record.
   public static let optionalFields: Set<AgencyField>
@@ -100,7 +100,7 @@ public struct Agency: Hashable, Identifiable {
 
   /// Basic init.
   public init(
-		agencyID: String? = nil,
+		agencyID: String = "",
 		name: String = "",
 		url: URL = URL(string: "https://unnamed.com")!,
 		timeZone: TimeZone = TimeZone(identifier: "UTC")!,
@@ -132,9 +132,9 @@ public struct Agency: Hashable, Identifiable {
       for (index, header) in headerFields.enumerated() {
         let field = recordFields[index]
         switch header {
-        case .name:
+        case .name, .agencyID:
           try field.assignStringTo(&self, for: header)
-        case .agencyID, .phone, .email:
+        case .phone, .email:
           try field.assignOptionalStringTo(&self, for: header)
         case .url:
           try field.assignURLValueTo(&self, for: header)
@@ -190,7 +190,7 @@ extension Agency: CustomDebugStringConvertible {
 // MARK: - Agencies
 
 /// A representation of a complete Agency dataset.
-public struct Agencies: Identifiable, RandomAccessCollection {
+public struct Agencies: Identifiable, RandomAccessCollection, Sendable {
 	public var startIndex: Int = 0
 	
 	public var endIndex: Int = 0
@@ -207,9 +207,9 @@ public struct Agencies: Identifiable, RandomAccessCollection {
 		return Agency.requiredFields.isSubset(of: headerFields)
 	}
 
-	public var hasConditionallyRequiredFields: Bool {
-		return Agency.conditionallyRequiredFields.isSubset(of: headerFields)
-	}
+	// public var hasConditionallyRequiredFields: Bool {
+	// 	return Agency.conditionallyRequiredFields.isSubset(of: headerFields)
+	// }
 	
 	public var hasRequiredAgencyIDs: Bool {
 		if agencies.count > 0 {
@@ -256,8 +256,7 @@ public struct Agencies: Identifiable, RandomAccessCollection {
   /// Initialize agencies dataset from file.
   public init(from url: URL, _ add: (Agency) async throws -> Void) async throws {
     do {
-      var encoding: String.Encoding = .nonLossyASCII
-      let records = try String(contentsOfFile: url.path, usedEncoding: &encoding).splitRecords()
+      let records: [Substring] = try String(contentsOfFile: url.path).splitRecords()
 
       if records.count <= 1 { return }
       let headerRecord = String(records[0])

@@ -9,9 +9,6 @@ final class Stop: Model, @unchecked Sendable {
     @ID(custom: .id)
     var id: String?
 
-    @Field(key: "stopId")
-    var stopId: String
-
     @OptionalField(key: "stopCode")
     var stopCode: String?
 
@@ -50,8 +47,7 @@ final class Stop: Model, @unchecked Sendable {
 
     // A complete initializer for creating new instances.
     init(
-        id: String? = nil,
-        stopId: String,
+        id: String? = UUID().uuidString,
         stopCode: String? = nil,
         stopName: String? = nil,
         stopDesc: String? = nil,
@@ -65,7 +61,6 @@ final class Stop: Model, @unchecked Sendable {
         wheelchairBoarding: Int? = nil
     ) {
         self.id = id
-        self.stopId = stopId
         self.stopCode = stopCode
         self.stopName = stopName
         self.stopDesc = stopDesc
@@ -87,8 +82,7 @@ struct CreateStop: AsyncMigration {
     /// This function creates the 'stop' schema with all the required fields.
     func prepare(on database: Database) async throws {
         try await database.schema(Stop.schema)
-            .id()
-            .field("stopId", .string, .required)
+            .field("id", .string, .identifier(auto: false))
             .field("stopCode", .string)
             .field("stopName", .string)
             .field("stopDesc", .string)
@@ -106,6 +100,6 @@ struct CreateStop: AsyncMigration {
     /// Reverts the database schema changes made in prepare.
     /// This function deletes the 'stop' schema.
     func revert(on database: Database) async throws {
-        try await database.schema(Stop.schema).delete()
+        try? await database.schema(Stop.schema).delete()
     }
 }

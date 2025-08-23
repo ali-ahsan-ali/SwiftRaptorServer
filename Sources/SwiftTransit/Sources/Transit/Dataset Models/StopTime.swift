@@ -71,7 +71,7 @@ public enum StopTimeField: String, Hashable, KeyPathVending, Sendable {
 // MARK: - StopTime
 
 /// A representation of a single StopTime record.
-public struct StopTime: Hashable, Identifiable {
+public struct StopTime: Hashable, Identifiable, Sendable {
   public var id = UUID()
   public var tripID: TransitID = ""
   public var arrival: Date?
@@ -164,7 +164,7 @@ extension StopTime: CustomStringConvertible {
 // MARK: - StopTimes
 
 /// - Tag: StopTimes
-public struct StopTimes: Identifiable {
+public struct StopTimes: Identifiable, Sendable {
   public let id = UUID()
   public var headerFields = [StopTimeField]()
   fileprivate var stopTimes = [StopTime]()
@@ -195,8 +195,7 @@ public struct StopTimes: Identifiable {
 
   init(from url: URL, _ add: (StopTime) async throws -> Void) async throws {
     do {
-      var encoding: String.Encoding = .nonLossyASCII
-      let records = try String(contentsOfFile: url.path, usedEncoding: &encoding).splitRecords()
+      let records: [Substring] = try String(contentsOfFile: url.path).splitRecords()
 
       if records.count < 1 { return }
       let headerRecord = String(records[0])

@@ -6,9 +6,6 @@ final class Route: Model, @unchecked Sendable {
     @ID(custom: .id)
     var id: String?
 
-    @Field(key: "routeId")
-    var routeId: String
-
     @OptionalField(key: "agencyId")
     var agencyId: String?
 
@@ -21,8 +18,8 @@ final class Route: Model, @unchecked Sendable {
     @OptionalField(key: "routeDesc")
     var routeDesc: String?
 
-    @Field(key: "routeType")
-    var routeType: Int
+    @OptionalField(key: "routeType")
+    var routeType: Int?
 
     @OptionalField(key: "routeUrl")
     var routeUrl: String?
@@ -38,19 +35,17 @@ final class Route: Model, @unchecked Sendable {
 
     // A complete initializer to create a new Route instance.
     public init(
-        id: String? = nil,
-        routeId: String,
+        id: String? = UUID().uuidString,
         agencyId: String?,
         routeShortName: String?,
         routeLongName: String?,
         routeDesc: String?,
-        routeType: Int,
+        routeType: Int?,
         routeUrl: String?,
         routeColor: String?,
         routeTextColor: String?
     ) {
         self.id = id
-        self.routeId = routeId
         self.agencyId = agencyId
         self.routeShortName = routeShortName
         self.routeLongName = routeLongName
@@ -68,13 +63,12 @@ struct CreateRoute: AsyncMigration {
     // Prepares the database for storing Route models.
     func prepare(on database: Database) async throws {
         try await database.schema(Route.schema)
-            .id()
-            .field("routeId", .string, .required)
+            .field("id", .string, .identifier(auto: false))
             .field("agencyId", .string)
             .field("routeShortName", .string)
             .field("routeLongName", .string)
             .field("routeDesc", .string)
-            .field("routeType", .int, .required)
+            .field("routeType", .int)
             .field("routeUrl", .string)
             .field("routeColor", .string)
             .field("routeTextColor", .string)
@@ -83,6 +77,6 @@ struct CreateRoute: AsyncMigration {
 
     // Reverts the database schema changes made in prepare.
     func revert(on database: Database) async throws {
-        try await database.schema(Route.schema).delete()
+        try? await database.schema(Route.schema).delete()
     }
 }

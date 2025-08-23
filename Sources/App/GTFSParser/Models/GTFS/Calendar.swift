@@ -44,7 +44,7 @@ final class Calendar: Model, @unchecked Sendable {
 
     // Complete initializer for creating new instances
     init(
-        id: String? = nil,
+        id: String? = UUID().uuidString,
         serviceId: String,
         monday: Int,
         tuesday: Int,
@@ -77,7 +77,7 @@ struct CreateCalendar: AsyncMigration {
     /// This function creates the 'calendar' schema with all the required fields.
     func prepare(on database: Database) async throws {
         try await database.schema(Calendar.schema)
-            .id()
+            .field("id", .string, .identifier(auto: false))
             .field("serviceId", .string, .required)
             .field("monday", .int, .required)
             .field("tuesday", .int, .required)
@@ -94,6 +94,6 @@ struct CreateCalendar: AsyncMigration {
     /// Reverts the database schema changes made in the prepare method.
     /// This function deletes the 'calendar' schema.
     func revert(on database: Database) async throws {
-        try await database.schema(Calendar.schema).delete()
+        try? await database.schema(Calendar.schema).delete()
     }
 }

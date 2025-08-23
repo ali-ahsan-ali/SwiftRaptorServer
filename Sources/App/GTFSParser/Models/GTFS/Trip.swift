@@ -41,7 +41,7 @@ final class Trip: Model, @unchecked Sendable {
 
     // Complete initializer for creating new instances
     init(
-        id: String? = nil,
+        id: String? = UUID().uuidString,
         routeId: String,
         serviceId: String,
         tripId: String,
@@ -72,7 +72,7 @@ struct CreateTrip: AsyncMigration {
     /// This function creates the 'trip' schema with all the required fields.
     func prepare(on database: Database) async throws {
         try await database.schema(Trip.schema)
-            .id()
+            .field("id", .string, .identifier(auto: false))
             .field("routeId", .string, .required)
             .field("serviceId", .string, .required)
             .field("tripId", .string, .required)
@@ -88,6 +88,6 @@ struct CreateTrip: AsyncMigration {
     /// Reverts the database schema changes made in prepare.
     /// This function deletes the 'trip' schema.
     func revert(on database: Database) async throws {
-        try await database.schema(Trip.schema).delete()
+        try? await database.schema(Trip.schema).delete()
     }
 }

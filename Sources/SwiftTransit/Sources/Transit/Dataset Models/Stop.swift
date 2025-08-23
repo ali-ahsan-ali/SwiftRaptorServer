@@ -94,7 +94,7 @@ public enum Accessibility: Int, Hashable, Sendable  {
 }
 
 /// A representation of a single Stop record.
-public struct Stop: Hashable, Identifiable {
+public struct Stop: Hashable, Identifiable, Sendable {
   public let id = UUID()
   public var stopID: TransitID = ""
   public var code: StopCode?
@@ -230,7 +230,7 @@ extension Stop: CustomStringConvertible {
 // MARK: - Stops
 
 /// A representation of a complete Stops dataset.
-public struct Stops: Identifiable {
+public struct Stops: Identifiable, Sendable {
   public let id = UUID()
   public var headerFields = [StopField]()
   public var stops = [Stop]()
@@ -261,8 +261,7 @@ public struct Stops: Identifiable {
 
   init(from url: URL, _ add: (Stop) async throws -> Void) async throws {
     do {
-      var encoding: String.Encoding = .nonLossyASCII
-      let records = try String(contentsOfFile: url.path, usedEncoding: &encoding).splitRecords()
+      let records: [Substring] = try String(contentsOfFile: url.path).splitRecords()
       
       if records.count <= 1 { return }
       let headerRecord = String(records[0])

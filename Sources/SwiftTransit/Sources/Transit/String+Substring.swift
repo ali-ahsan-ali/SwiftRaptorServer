@@ -96,7 +96,11 @@ extension String {
     var result: [String] = []
     do {
       while !remainder.isEmpty {
-        try result.append(remainder.nextField())
+        var next = try remainder.nextField()
+        next.removeAll { c in
+          c == Character("\u{FEFF}") // U+feff  
+        }
+        result.append(next)
       }
 			// In the case that the record ends with a comma, then there is
 			// an extra field that was not detected by `nextField` and we

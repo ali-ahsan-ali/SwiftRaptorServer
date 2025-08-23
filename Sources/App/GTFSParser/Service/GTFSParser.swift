@@ -13,36 +13,36 @@ struct GTFSParser {
         _ = try await Feed(
             contentsOfURL: directory,
             addAgency: { agency in
+                logger.debug("Adding agency: \(agency.name) with ID: \(agency.agencyID)")
+                let agency = Agency(
+                    id: agency.agencyID,
+                    agencyName: agency.name,
+                    agencyUrl: agency.url.path,
+                    agencyTimezone: agency.timeZone.identifier
+                )
                 do {
-                    try await Agency(
-                        id: agency.agencyID,
-                        agencyName: agency.name,
-                        agencyUrl: agency.url.path,
-                        agencyTimezone: agency.timeZone.identifier
-                    )
-                    .save(on: fluent.db())
+                    try await agency.save(on: fluent.db())
                 } catch {
-                    logger.error("Failed to save agency \(agency.agencyID ?? "NO ID"): \(error.localizedDescription)")
+                    logger.error("\(String(reflecting: error))")
                     throw error
                 }
             },
             addRoutes: { route in
+                let route = Route(
+                    id: route.routeID,
+                    agencyId: route.agencyID,
+                    routeShortName: route.shortName,
+                    routeLongName: route.name,
+                    routeDesc: route.details,
+                    routeType: route.type.rawValue,
+                    routeUrl: route.url?.absoluteString,
+                    routeColor: nil,
+                    routeTextColor: nil
+                )
                 do {
-                    try await Route(
-                        id: route.routeID,
-                        routeId: route.routeID,
-                        agencyId: route.agencyID,
-                        routeShortName: route.shortName,
-                        routeLongName: route.name,
-                        routeDesc: route.details,
-                        routeType: route.type.rawValue,
-                        routeUrl: route.url?.absoluteString,
-                        routeColor: nil,
-                        routeTextColor: nil
-                    )
-                    .save(on: fluent.db())
+                    try await route.save(on: fluent.db())
                 } catch {
-                    logger.error("Failed to save route \(route.routeID): \(error.localizedDescription)")
+                    logger.error("\(String(reflecting: error))")
                     throw error
                 }
             },
@@ -50,7 +50,6 @@ struct GTFSParser {
                 do {
                     try await Stop(
                         id: stop.stopID,
-                        stopId: stop.stopID,
                         stopCode: stop.code,
                         stopName: stop.name,
                         stopDesc: stop.details,
@@ -65,7 +64,7 @@ struct GTFSParser {
                     )
                     .save(on: fluent.db())
                 } catch {
-                    logger.error("Failed to save stop \(stop.stopID): \(error.localizedDescription)")
+                    logger.error("\(String(reflecting: error))")
                     throw error
                 }
             },
@@ -85,7 +84,7 @@ struct GTFSParser {
                     )
                     .save(on: fluent.db())
                 } catch {
-                    logger.error("Failed to save trip \(trip.tripID): \(error.localizedDescription)")
+                    logger.error("\(String(reflecting: error))")
                     throw error
                 }
             },
@@ -108,7 +107,7 @@ struct GTFSParser {
                     )
                     .save(on: fluent.db())
                 } catch {
-                    logger.error("Failed to save stop time for trip \(stopTime.tripID): \(error.localizedDescription)")
+                    logger.error("\(String(reflecting: error))")
                     throw error
                 }
             }

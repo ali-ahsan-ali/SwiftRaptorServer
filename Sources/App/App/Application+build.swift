@@ -113,7 +113,7 @@ public func buildApplication(_ arguments: some AppArguments) async throws -> som
 
     if arguments.shouldCompleteStartupTask {
         app.beforeServerStarts {
-            // fluent persist driver requires a migrate the first time you run
+            try await fluent.revert()
             try await fluent.migrate()
             try await metroService.loadGTFSFeed()
         }

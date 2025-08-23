@@ -64,7 +64,7 @@ public enum Direction: UInt, Hashable, Sendable  {
 // MARK: - Trip
 
 /// A representation of a single Trip record.
-public struct Trip: Hashable, Identifiable {
+public struct Trip: Hashable, Identifiable, Sendable {
   public let id = UUID()
   public var routeID: TransitID = ""
   public var serviceID: TransitID = ""
@@ -147,7 +147,7 @@ extension Trip: CustomStringConvertible {
 // MARK: - Trips
 
 /// - Tag: Trips
-public struct Trips: Identifiable {
+public struct Trips: Identifiable, Sendable {
   public let id = UUID()
   public var headerFields = [TripField]()
   fileprivate var trips = [Trip]()
@@ -178,8 +178,7 @@ public struct Trips: Identifiable {
 
   init(from url: URL, _ add: (Trip) async throws -> Void) async throws {
     do {
-      var encoding: String.Encoding = .nonLossyASCII
-      let records = try String(contentsOfFile: url.path, usedEncoding: &encoding).splitRecords()
+      let records: [Substring] = try String(contentsOfFile: url.path).splitRecords()
       
       if records.count < 1 { return }
       let headerRecord = String(records[0])
