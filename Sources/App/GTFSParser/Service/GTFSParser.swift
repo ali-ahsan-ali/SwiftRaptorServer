@@ -72,9 +72,8 @@ struct GTFSParser {
                 do {
                     try await Trip(
                         id: trip.tripID,
-                        routeId: trip.tripID,
-                        serviceId: trip.routeID,
-                        tripId: trip.serviceID,
+                        routeId: trip.routeID,
+                        serviceId: trip.serviceID,
                         tripHeadsign: trip.headSign,
                         tripShortName: trip.shortName,
                         directionId: trip.direction,
@@ -112,6 +111,6 @@ struct GTFSParser {
                 }
             }
         )
-        print("GTFS data parsed and saved successfully.")
+        logger.debug("GTFS data parsed and saved successfully.")
     }
 }

@@ -97,8 +97,8 @@ extension String {
     do {
       while !remainder.isEmpty {
         var next = try remainder.nextField()
-        next.removeAll { c in
-          c == Character("\u{FEFF}") // U+feff  
+        if next.first == Character("\u{FEFF}") {
+          next.removeFirst()
         }
         result.append(next)
       }

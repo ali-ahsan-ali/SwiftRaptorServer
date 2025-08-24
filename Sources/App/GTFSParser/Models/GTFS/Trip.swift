@@ -15,9 +15,6 @@ final class Trip: Model, @unchecked Sendable {
     @Field(key: "serviceId")
     var serviceId: String
 
-    @Field(key: "tripId")
-    var tripId: String
-
     @OptionalField(key: "tripHeadsign")
     var tripHeadsign: String?
 
@@ -44,7 +41,6 @@ final class Trip: Model, @unchecked Sendable {
         id: String? = UUID().uuidString,
         routeId: String,
         serviceId: String,
-        tripId: String,
         tripHeadsign: String? = nil,
         tripShortName: String? = nil,
         directionId: String? = nil,
@@ -55,7 +51,6 @@ final class Trip: Model, @unchecked Sendable {
         self.id = id
         self.routeId = routeId
         self.serviceId = serviceId
-        self.tripId = tripId
         self.tripHeadsign = tripHeadsign
         self.tripShortName = tripShortName
         self.directionId = directionId
@@ -75,7 +70,6 @@ struct CreateTrip: AsyncMigration {
             .field("id", .string, .identifier(auto: false))
             .field("routeId", .string, .required)
             .field("serviceId", .string, .required)
-            .field("tripId", .string, .required)
             .field("tripHeadsign", .string)
             .field("tripShortName", .string)
             .field("directionId", .string)
